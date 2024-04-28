@@ -1,15 +1,28 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_portfolio/globals/app_buttons.dart';
+import 'package:my_portfolio/globals/app_colors.dart';
+import 'package:my_portfolio/globals/app_text_styles.dart';
+import 'package:my_portfolio/globals/constants.dart';
 import 'package:my_portfolio/helper%20class/helper_class.dart';
 import 'package:my_portfolio/views/contact_us.dart';
-import '../globals/app_colors.dart';
-import '../globals/app_text_styles.dart';
-import '../globals/constants.dart';
 
-class ContactUs1 extends StatelessWidget {
-  const ContactUs1({Key? key}) : super(key: key);
+class Contasendmes extends StatefulWidget {
+  const Contasendmes({Key? key}) : super(key: key);
+
+  @override
+  _ContasendmesState createState() => _ContasendmesState();
+}
+
+class _ContasendmesState extends State<Contasendmes> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController emailAddressController = TextEditingController();
+  final TextEditingController mobileNumberController = TextEditingController();
+  final TextEditingController emailSubjectController = TextEditingController();
+  final TextEditingController messageController = TextEditingController();
 
   Future<void> sendMessage(
       String fullName,
@@ -27,7 +40,13 @@ class ContactUs1 extends StatelessWidget {
         'emailSubject': emailSubject,
         'message': message,
       });
-// Clear text fields after message sent successfully
+
+      // Clear text fields after message sent successfully
+      fullNameController.clear();
+      emailAddressController.clear();
+      mobileNumberController.clear();
+      emailSubjectController.clear();
+      messageController.clear();
 
       // Message sent successfully, handle accordingly
       print('Message sent successfully');
@@ -40,6 +59,16 @@ class ContactUs1 extends StatelessWidget {
       // Error handling
       print('Failed to send message: $e');
     }
+  }
+
+  bool isValidEmail(String email) {
+    // Regular expression for a valid email pattern
+    final RegExp emailRegex = RegExp(
+      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+      caseSensitive: false,
+      multiLine: false,
+    );
+    return emailRegex.hasMatch(email);
   }
 
   @override
@@ -55,116 +84,120 @@ class ContactUs1 extends StatelessWidget {
   }
 
   Widget buildForm(BuildContext context) {
-    final TextEditingController fullNameController = TextEditingController();
-    final TextEditingController emailAddressController =
-        TextEditingController();
-    final TextEditingController mobileNumberController =
-        TextEditingController();
-    final TextEditingController emailSubjectController =
-        TextEditingController();
-    final TextEditingController messageController = TextEditingController();
-
     return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          buildContactText(),
-          Constants.sizedBox(height: 40.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Material(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.transparent,
-                  elevation: 8,
-                  child: TextField(
+      child: Form(
+        // Create a GlobalKey for the Form
+        key: _formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            buildContactText(),
+            Constants.sizedBox(height: 40.0),
+            // Full Name and Email Address in one row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: TextFormField(
                     controller: fullNameController,
                     cursorColor: AppColors.black,
                     style: AppTextStyles.normalStyle1(),
                     decoration: buildInputDecoration(hintText: 'Full Name'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your full name';
+                      }
+                      return null;
+                    },
                   ),
                 ),
-              ),
-              SizedBox(width: 20.0),
-              Expanded(
-                child: Material(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.transparent,
-                  elevation: 8,
-                  child: TextField(
+                Constants.sizedBox(width: 20.0),
+                Expanded(
+                  child: TextFormField(
                     controller: emailAddressController,
                     cursorColor: AppColors.black,
                     style: AppTextStyles.normalStyle1(),
                     decoration: buildInputDecoration(hintText: 'Email Address'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email address';
+                      } else if (!isValidEmail(value)) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
                   ),
                 ),
-              ),
-            ],
-          ),
-          Constants.sizedBox(height: 20.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Material(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.transparent,
-                  elevation: 8,
-                  child: TextField(
-                    controller: mobileNumberController,
-                    cursorColor: AppColors.black,
-                    style: AppTextStyles.normalStyle1(),
-                    decoration: buildInputDecoration(hintText: 'Mobile Number'),
-                  ),
-                ),
-              ),
-              SizedBox(width: 20.0),
-              Expanded(
-                child: Material(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.transparent,
-                  elevation: 8,
-                  child: TextField(
-                    controller: emailSubjectController,
-                    cursorColor: AppColors.black,
-                    style: AppTextStyles.normalStyle1(),
-                    decoration: buildInputDecoration(hintText: 'Email Subject'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Constants.sizedBox(height: 20.0),
-          Material(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.transparent,
-            elevation: 8,
-            child: TextField(
+              ],
+            ),
+            Constants.sizedBox(height: 20.0),
+            // Mobile Number in one row
+            TextFormField(
+              controller: mobileNumberController,
+              cursorColor: AppColors.black,
+              style: AppTextStyles.normalStyle1(),
+              decoration: buildInputDecoration(hintText: 'Mobile Number'),
+              keyboardType: TextInputType.phone, // Set keyboard type to phone
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly
+              ], // Allow only digits
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your mobile number';
+                }
+                return null;
+              },
+            ),
+            Constants.sizedBox(height: 20.0),
+            // Email Subject in one row
+            TextFormField(
+              controller: emailSubjectController,
+              cursorColor: AppColors.black,
+              style: AppTextStyles.normalStyle1(),
+              decoration: buildInputDecoration(hintText: 'Email Subject'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter the email subject';
+                }
+                return null;
+              },
+            ),
+            Constants.sizedBox(height: 20.0),
+            // Message TextFormField
+            TextFormField(
               controller: messageController,
               maxLines: 10,
               cursorColor: AppColors.black,
               style: AppTextStyles.normalStyle1(),
               decoration: buildInputDecoration(hintText: 'Your Message'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your message';
+                }
+                return null;
+              },
             ),
-          ),
-          Constants.sizedBox(height: 40.0),
-          AppButtons.buildMaterialButton(
-            buttonName: 'Send Message',
-            onTap: () {
-              sendMessage(
-                fullNameController.text,
-                emailAddressController.text,
-                mobileNumberController.text,
-                emailSubjectController.text,
-                messageController.text,
-                context,
-              );
-            },
-          ),
-          Constants.sizedBox(height: 30.0),
-        ],
+            Constants.sizedBox(height: 40.0),
+            AppButtons.buildMaterialButton(
+              buttonName: 'Send Message',
+              onTap: () {
+                // Validate the form before submitting
+                if (_formKey.currentState?.validate() ?? false) {
+                  sendMessage(
+                    fullNameController.text,
+                    emailAddressController.text,
+                    mobileNumberController.text,
+                    emailSubjectController.text,
+                    messageController.text,
+                    context,
+                  );
+                }
+              },
+            ),
+            Constants.sizedBox(height: 30.0),
+          ],
+        ),
       ),
     );
   }
